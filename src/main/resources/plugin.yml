@@ -1,0 +1,39 @@
+name: LaggRemover
+version: '${version}'
+main: club.ifcserver.laggremover.main.LaggRemover
+api-version: 1.19
+
+commands:
+  lr:
+    description: Generic LaggRemover command.
+    usage: <command>
+
+permissions:
+  lr.help:
+    description: Gives access to the help command.
+    default: true
+  lr.master:
+    description: Gives access to the master listing of all performance data from the server.
+  lr.lagg:
+    description: Gives access to view the Ticks Per a Second(TPS) of the server.
+  lr.world:
+    description: View data about a certain world.
+  lr.clear:
+    description: Allows you to clear all items on the ground or entities in a world.
+  lr.unload:
+    description: Allows players to unload all chunks in a world.
+  lr.gc:
+    description: Allows players to run LaggRemovers garbage collector to free RAM.
+  lr.update:
+    description: Allows LaggRemover to notify a player when an update is downloaded.
+  lr.nochatdelay:
+    description: Makes a player imune to the chat delay.
+  lr.modules:
+    description: Allows you to list loaded modules.
+    default: true
+  lr.ram:
+    description: Allows players to list the ram avaliable on the server.
+  lr.protocol:
+    description: Allows players to view/manipulate protocols.
+  lr.ping:
+    description: Allows a player to view the ping of another player (or themself)
