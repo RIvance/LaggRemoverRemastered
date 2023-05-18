@@ -18,6 +18,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Objects;
 import java.util.zip.ZipFile;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
@@ -53,37 +54,8 @@ public class LaggRemover extends JavaPlugin implements Listener {
         Help.init();
         Protocol.init();
         LRConfig.init();
-        if (getConfig().getBoolean("splashScreen")) {
-
-            try {
-
-                ByteArrayOutputStream bo = new ByteArrayOutputStream();
-                InputStream in = LaggRemover.class.getResourceAsStream("/club/ifcserver/laggremover/assets/splash.txt");
-                byte[] buff = new byte[512];
-                while (true) {
-                    try {
-                        int spi = in.read(buff);
-                        if (spi == -1) {
-                            break;
-                        }
-                        bo.write(buff, 0, spi);
-                    } catch (IOException e) {
-                        getLogger().warning("Could not load splash screen.");
-                    }
-                }
-
-                in.close();
-                bo.flush();
-
-                String splashText = bo.toString();
-                System.out.println(splashText);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
         loaded = new HashMap<>();
-        prefix = getConfig().getString("prefix").replaceAll("&", "§");
+        prefix = Objects.requireNonNull(getConfig().getString("prefix")).replaceAll("&", "§");
         if (LRConfig.autoChunk) {
             // from class: drew6017.lr.main.LaggRemover.1
             Bukkit.getScheduler().scheduleSyncRepeatingTask(lr, () -> {
@@ -104,7 +76,7 @@ public class LaggRemover extends JavaPlugin implements Listener {
         if (!modDir.exists()) {
             modDir.mkdirs();
         }
-        for (File f : modDir.listFiles()) {
+        for (File f : Objects.requireNonNull(modDir.listFiles())) {
             if (!f.isDirectory() && f.getName().endsWith(".jar")) {
                 try {
                     URL[] classes = {f.toURI().toURL()};
@@ -125,19 +97,11 @@ public class LaggRemover extends JavaPlugin implements Listener {
                 }
             }
         }
-        getLogger().info("Loaded " + Integer.toString(loaded.size()) + " module(s)");
+        getLogger().info("Loaded " + loaded.size() + " module(s)");
         if (LRConfig.isAIActive) {
             getLogger().info("The LaggRemover AI is now active!");
         }
         getLogger().info("LaggRemover has been enabled!");
-//        if (getConfig().getBoolean("auto-update")) {
-//            Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable() { // from class: drew6017.lr.main.LaggRemover.2
-//                @Override // java.lang.Runnable
-//                public void run() {
-//                    new Updater((Plugin) LaggRemover.lr, 91200, LaggRemover.this.getFile(), Updater.UpdateType.DEFAULT, true);
-//                }
-//            }, 0L, 144000L);
-//        }
     }
 
     public void onDisable() {

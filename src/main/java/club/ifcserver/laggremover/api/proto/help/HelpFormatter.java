@@ -1,8 +1,9 @@
 package club.ifcserver.laggremover.api.proto.help;
 
 import club.ifcserver.laggremover.api.aparser.ProtoParse;
-import com.avaje.ebean.validation.NotNull;
 import club.ifcserver.laggremover.util.DoubleVar;
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

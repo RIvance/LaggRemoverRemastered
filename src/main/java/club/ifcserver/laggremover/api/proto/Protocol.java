@@ -61,12 +61,12 @@ public class Protocol {
         String var = null;
         HashMap<Long, Counter.CountAction> actions = new HashMap<>();
         List<String> args = LaggRemover.lr.getConfig().getStringList("protocol_warnings." + p + ".stages");
-        for (int i = 0; i < args.size(); i++) {
-            final String[] a = args.get(i).replaceAll("&", "§").replaceAll("%PREFIX%", LaggRemover.prefix).split(":");
+        for (String arg : args) {
+            final String[] a = arg.replaceAll("&", "§").replaceAll("%PREFIX%", LaggRemover.prefix).split(":");
             if (a[0].equalsIgnoreCase("f")) {
                 var = a[1];
             } else {
-                actions.put(Long.valueOf(Long.parseLong(a[0])), new Counter.CountAction(Long.parseLong(a[0])) { // from class: drew6017.lr.api.proto.Protocol.1
+                actions.put(Long.parseLong(a[0]), new Counter.CountAction(Long.parseLong(a[0])) { // from class: drew6017.lr.api.proto.Protocol.1
                     @Override // drew6017.lr.util.Counter.CountAction
                     public void onTrigger() {
                         LaggRemover.broadcast(a[1]);
@@ -100,14 +100,12 @@ public class Protocol {
 
     /* JADX INFO: Access modifiers changed from: private */
     public static void delayLoop(final Counter c, final DelayedLRProtocolResult res, final LRProtocol p, final Object[] args) {
-        Bukkit.getScheduler().scheduleSyncDelayedTask(LaggRemover.lr, new Runnable() { // from class: drew6017.lr.api.proto.Protocol.3
-            @Override // java.lang.Runnable
-            public void run() {
-                if (Counter.this.isActive()) {
-                    Protocol.delayLoop(Counter.this, res, p, args);
-                } else {
-                    res.receive(Protocol.run(p, args));
-                }
+        // from class: drew6017.lr.api.proto.Protocol.3
+        Bukkit.getScheduler().scheduleSyncDelayedTask(LaggRemover.lr, () -> {
+            if (c.isActive()) {
+                Protocol.delayLoop(c, res, p, args);
+            } else {
+                res.receive(run(p, args));
             }
         }, 1L);
     }

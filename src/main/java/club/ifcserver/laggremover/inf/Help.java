@@ -9,7 +9,7 @@ import org.bukkit.entity.Player;
 
 /* loaded from: LaggRemover-2.0.6.jar:drew6017/lr/inf/Help.class */
 public class Help {
-    private static final List<String> commandsH = new ArrayList();
+    private static final List<String> commandsH = new ArrayList<>();
 
     public static void init() {
         commandsH.add("§e /lr help(h) <num>:§7 Lists all available commands.");
@@ -31,10 +31,10 @@ public class Help {
         List<List<String>> pages = getPages();
         int maxPages = pages.size();
         if (pageNum > maxPages) {
-            sendMsg(p, "§cHelp page #" + Integer.toString(pageNum) + " does not exist.", true);
+            sendMsg(p, "§cHelp page #" + pageNum + " does not exist.", true);
             return;
         }
-        sendMsg(p, "§3---------========== Help Page (§b" + Integer.toString(pageNum) + "§3/§b" + Integer.toString(maxPages) + "§3) ==========---------", false);
+        sendMsg(p, "§3---------========== Help Page (§b" + pageNum + "§3/§b" + Integer.toString(maxPages) + "§3) ==========---------", false);
         for (String s : pages.get(pageNum - 1)) {
             sendMsg(p, s, false);
         }
