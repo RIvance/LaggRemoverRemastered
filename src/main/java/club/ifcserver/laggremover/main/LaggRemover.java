@@ -19,7 +19,12 @@ import java.net.URLClassLoader;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.zip.ZipFile;
+
+import io.papermc.paper.threadedregions.scheduler.GlobalRegionScheduler;
+import io.papermc.paper.threadedregions.scheduler.RegionScheduler;
+import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.World;
@@ -48,29 +53,35 @@ public class LaggRemover extends JavaPlugin implements Listener {
     private static HashMap<Module, String[]> loaded;
 
     public void onEnable() {
-        File[] listFiles;
+
         lr = this;
+        GlobalRegionScheduler scheduler = Bukkit.getGlobalRegionScheduler();
+
         Bukkit.getServer().getPluginManager().registerEvents(new Events(), this);
-         Bukkit.getServer().getScheduler().runTaskTimer(this, new TPS(), 100L, 1L);
+
+        // new TPS().runTaskTimerAsynchronously(this, 100L, 1L);
+        scheduler.runAtFixedRate(this, __ -> new TPS().run(), 100L, 1L);
 
         Help.init();
         Protocol.init();
         LRConfig.init();
         loaded = new HashMap<>();
         prefix = Objects.requireNonNull(getConfig().getString("prefix")).replaceAll("&", "§");
+
         if (LRConfig.autoChunk) {
             // from class: drew6017.lr.main.LaggRemover.1
-            Bukkit.getScheduler().runTaskTimer(lr, () -> {
-                Chunk[] loadedChunks;
-                for (World world : LaggRemover.this.getServer().getWorlds()) {
-                    if (world.getPlayers().size() == 0) {
-                        for (Chunk chunk : world.getLoadedChunks()) {
-                            world.unloadChunk(chunk);
-                        }
-                    }
-                }
-            }, 200L, 200L);
+            LaggRemover.lr.getLogger().warning("Config `autoChunk` is not supported in Folia, disabled.");
+            // scheduler.runAtFixedRate(this, scheduledTask -> {
+            //     for (World world : LaggRemover.this.getServer().getWorlds()) {
+            //         if (world.getPlayers().size() == 0) {
+            //             for (Chunk chunk : world.getLoadedChunks()) {
+            //                 world.unloadChunk(chunk);
+            //             }
+            //         }
+            //     }
+            // }, 200L, 200L);
         }
+
         if (LRConfig.autoLagRemoval) {
             autoLagRemovalLoop();
         }

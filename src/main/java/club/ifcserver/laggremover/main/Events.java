@@ -31,7 +31,8 @@ public class Events implements Listener {
     @EventHandler(priority = EventPriority.LOWEST)
     public void onWorldLoad(WorldInitEvent e) {
         if (LRConfig.noSpawnChunks) {
-            e.getWorld().setKeepSpawnInMemory(false);
+            LaggRemover.lr.getLogger().warning("Config `noSpawnChunks` is not supported in Folia, disabled.");
+            // e.getWorld().setKeepSpawnInMemory(false);
         }
     }
 

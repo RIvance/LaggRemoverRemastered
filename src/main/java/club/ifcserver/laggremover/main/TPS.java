@@ -2,9 +2,10 @@ package club.ifcserver.laggremover.main;
 
 import club.ifcserver.laggremover.util.BitString;
 import club.ifcserver.laggremover.util.DrewMath;
+import org.bukkit.scheduler.BukkitRunnable;
 
 /* loaded from: LaggRemover-2.0.6.jar:drew6017/lr/main/TPS.class */
-public class TPS implements Runnable {
+public class TPS extends BukkitRunnable {
     public static int TICK_COUNT = 0;
     public static long[] TICKS = new long[600];
 
