@@ -34,6 +34,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntitySpawnEvent;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
 
 /* loaded from: LaggRemover-2.0.6.jar:drew6017/lr/main/LaggRemover.class */
 public class LaggRemover extends JavaPlugin implements Listener {
@@ -50,7 +51,8 @@ public class LaggRemover extends JavaPlugin implements Listener {
         File[] listFiles;
         lr = this;
         Bukkit.getServer().getPluginManager().registerEvents(new Events(), this);
-        Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(this, new TPS(), 100L, 1L);
+         Bukkit.getServer().getScheduler().runTaskTimer(this, new TPS(), 100L, 1L);
+
         Help.init();
         Protocol.init();
         LRConfig.init();
@@ -58,7 +60,7 @@ public class LaggRemover extends JavaPlugin implements Listener {
         prefix = Objects.requireNonNull(getConfig().getString("prefix")).replaceAll("&", "§");
         if (LRConfig.autoChunk) {
             // from class: drew6017.lr.main.LaggRemover.1
-            Bukkit.getScheduler().scheduleSyncRepeatingTask(lr, () -> {
+            Bukkit.getScheduler().runTaskTimer(lr, () -> {
                 Chunk[] loadedChunks;
                 for (World world : LaggRemover.this.getServer().getWorlds()) {
                     if (world.getPlayers().size() == 0) {
