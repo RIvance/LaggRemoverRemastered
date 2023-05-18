@@ -3,7 +3,7 @@ plugins {
 }
 
 group = 'club.ifcserver'
-version = '0.1-beta'
+version = '0.1-folia'
 
 repositories {
     mavenCentral()
