@@ -4,7 +4,7 @@ This is a remastered version of [LaggRemover](https://dev.bukkit.org/projects/la
 
 ## Why This Project Exist
 LaggRemove is an excellent optimization plugin, but it does not support Folia server and is unable to work well in Spigot/Paper server above 1.14. 
-We tried to send a issue to the original of LaggRemover, but there's no feedback. So we consider to migrate this plugin to high version Spigot/Paper/Folia server.
+We tried to send a issue to the original author of LaggRemover, but there's no feedback. So we consider to migrate this plugin to high version Spigot/Paper/Folia server.
 
 ## Is this legal?
 We tried to contact the author via GitHub to get the access, but we didn't get any feedback so we decided to migrate this plugin directly. We will always acknowledge that this plugin is owned by the original author, and we will remove this project immediately if the original author want us to do so.
