@@ -8,23 +8,7 @@ import club.ifcserver.laggremover.api.proto.Protocol;
 import club.ifcserver.laggremover.inf.Help;
 import club.ifcserver.laggremover.util.DoubleVar;
 import club.ifcserver.laggremover.util.LRConfig;
-
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Objects;
-import java.util.function.Consumer;
-import java.util.zip.ZipFile;
-
 import io.papermc.paper.threadedregions.scheduler.GlobalRegionScheduler;
-import io.papermc.paper.threadedregions.scheduler.RegionScheduler;
-import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.World;
@@ -37,9 +21,17 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntitySpawnEvent;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitRunnable;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Objects;
+import java.util.zip.ZipFile;
 
 /* loaded from: LaggRemover-2.0.6.jar:drew6017/lr/main/LaggRemover.class */
 public class LaggRemover extends JavaPlugin implements Listener {
@@ -70,16 +62,18 @@ public class LaggRemover extends JavaPlugin implements Listener {
 
         if (LRConfig.autoChunk) {
             // from class: drew6017.lr.main.LaggRemover.1
-            LaggRemover.lr.getLogger().warning("Config `autoChunk` is not supported in Folia, disabled.");
-            // scheduler.runAtFixedRate(this, scheduledTask -> {
-            //     for (World world : LaggRemover.this.getServer().getWorlds()) {
-            //         if (world.getPlayers().size() == 0) {
-            //             for (Chunk chunk : world.getLoadedChunks()) {
-            //                 world.unloadChunk(chunk);
-            //             }
-            //         }
-            //     }
-            // }, 200L, 200L);
+            scheduler.runAtFixedRate(this, scheduledTask -> {
+                for (World world : LaggRemover.this.getServer().getWorlds()) {
+                    if (world.getPlayers().size() == 0) {
+                        for (Chunk chunk : world.getLoadedChunks()) {
+                            getLogger().info("Unloading chuck (" + chunk.getX() + ", " + chunk.getZ() + ")");
+                            if (!world.unloadChunkRequest(chunk.getX(), chunk.getZ())) {
+                                getLogger().info("Failed to unload chuck (" + chunk.getX() + ", " + chunk.getZ() + ")");
+                            }
+                        }
+                    }
+                }
+            }, 200L, 200L);
         }
 
         if (LRConfig.autoLagRemoval) {
@@ -105,7 +99,8 @@ public class LaggRemover extends JavaPlugin implements Listener {
                     Module m = (Module) plugin.newInstance();
                     loaded.put(m, new String[]{name, version, author});
                     m.onEnable();
-                } catch (IOException | ClassNotFoundException | IllegalAccessException | InstantiationException | InvalidConfigurationException e2) {
+                } catch (IOException | ClassNotFoundException | IllegalAccessException | InstantiationException |
+                         InvalidConfigurationException e2) {
                     getLogger().info("LaggRemover located an invalid module named \"" + f.getName() + "\"");
                 }
             }
