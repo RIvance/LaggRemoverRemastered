@@ -5,7 +5,6 @@ import club.ifcserver.laggremover.api.proto.DelayedLRProtocolResult;
 import club.ifcserver.laggremover.api.proto.LRProtocol;
 import club.ifcserver.laggremover.api.proto.LRProtocolResult;
 import club.ifcserver.laggremover.api.proto.Protocol;
-import club.ifcserver.laggremover.api.vcon.VCon;
 import club.ifcserver.laggremover.inf.Help;
 import club.ifcserver.laggremover.proto.bin.CCEntities;
 import club.ifcserver.laggremover.proto.bin.CCItems;
@@ -13,10 +12,6 @@ import club.ifcserver.laggremover.proto.bin.LRGC;
 import club.ifcserver.laggremover.util.BitString;
 import club.ifcserver.laggremover.util.DoubleVar;
 import club.ifcserver.laggremover.util.DrewMath;
-import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.World;
@@ -24,12 +19,16 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.json.simple.parser.ParseException;
 
+import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+
 /* loaded from: LaggRemover-2.0.6.jar:drew6017/lr/main/LRCommand.class */
 public class LRCommand {
     public static boolean onCommand(final Player p, String[] args) {
         World w;
         String raw_fin;
-        Chunk[] loadedChunks;
         World w2;
         EntityType[] ents;
         World w3;
@@ -65,17 +64,15 @@ public class LRCommand {
                 }
                 double avPing = 0.0d;
                 double pps = 0.0d;
-                if (VCon.isSupported()) {
-                    for (Player pp : Bukkit.getOnlinePlayers()) {
-                        int ping = VCon.a.getPing(pp);
-                        if (ping <= 10000) {
-                            avPing += ping;
-                            pps += 1.0d;
-                        }
+                for (Player pp : Bukkit.getOnlinePlayers()) {
+                    int ping = pp.getPing();
+                    if (ping <= 10000) {
+                        avPing += ping;
+                        pps += 1.0d;
                     }
-                    if (pps != 0.0d) {
-                        avPing /= pps;
-                    }
+                }
+                if (pps != 0.0d) {
+                    avPing /= pps;
                 }
                 String s = p == null ? "" : BitString.SQUARE.getComp();
                 StringBuilder sb = new StringBuilder();
@@ -87,15 +84,15 @@ public class LRCommand {
                 sb.append("\n§e").append(s).append(" Entities:§7 ").append(NumberFormat.getNumberInstance().format(entities));
                 sb.append("\n§e").append(s).append(" Players:§7 ").append(NumberFormat.getNumberInstance().format(players));
                 sb.append("\n§e").append(s).append(" Avg. Ping:§7 ");
-                if (VCon.isSupported()) {
+                // if (VCon.isSupported()) {
                     if (pps == 0.0d) {
                         sb.append("(no players)");
                     } else {
                         sb.append(NumberFormat.getNumberInstance().format(DrewMath.round(avPing, 1))).append("ms");
                     }
-                } else {
-                    sb.append("Not supported");
-                }
+                // } else {
+                //     sb.append("Not supported");
+                // }
                 Help.sendMsg(p, sb.toString(), false);
                 return true;
             }
@@ -256,7 +253,7 @@ public class LRCommand {
                 if (args.length == 2) {
                     Player p1 = Bukkit.getPlayer(args[1]);
                     if (p1 != null) {
-                        Help.sendMsg(p, "§ePlayer \"" + args[1] + "\" has a ping of §b" + Integer.toString(VCon.a.getPing(p1)) + "§ems", true);
+                        Help.sendMsg(p, "§ePlayer \"" + args[1] + "\" has a ping of §b" + p1.getPing() + "§ems", true);
                         return true;
                     }
                     Help.sendMsg(p, "§c\"" + args[1] + "\" is not a valid player.", true);
@@ -266,7 +263,7 @@ public class LRCommand {
                         Help.sendMsg(null, "You must specify a player if using this command from the command line.", true);
                         return true;
                     }
-                    Help.sendMsg(p, "§eYour current ping is §b" + Integer.toString(VCon.a.getPing(p)) + "§ems", true);
+                    Help.sendMsg(p, "§eYour current ping is §b" + p.getPing() + "§ems", true);
                     return true;
                 } else {
                     Help.sendMsg(p, "§cCorrect usage: /lr ping(p) <player:none>", true);

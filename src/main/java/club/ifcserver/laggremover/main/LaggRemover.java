@@ -85,15 +85,13 @@ public class LaggRemover extends JavaPlugin implements Listener {
         loaded = new HashMap<>();
         prefix = getConfig().getString("prefix").replaceAll("&", "§");
         if (LRConfig.autoChunk) {
-            Bukkit.getScheduler().scheduleSyncRepeatingTask(lr, new Runnable() { // from class: drew6017.lr.main.LaggRemover.1
-                @Override // java.lang.Runnable
-                public void run() {
-                    Chunk[] loadedChunks;
-                    for (World world : LaggRemover.this.getServer().getWorlds()) {
-                        if (world.getPlayers().size() == 0) {
-                            for (Chunk chunk : world.getLoadedChunks()) {
-                                world.unloadChunk(chunk);
-                            }
+            // from class: drew6017.lr.main.LaggRemover.1
+            Bukkit.getScheduler().scheduleSyncRepeatingTask(lr, () -> {
+                Chunk[] loadedChunks;
+                for (World world : LaggRemover.this.getServer().getWorlds()) {
+                    if (world.getPlayers().size() == 0) {
+                        for (Chunk chunk : world.getLoadedChunks()) {
+                            world.unloadChunk(chunk);
                         }
                     }
                 }
@@ -132,14 +130,14 @@ public class LaggRemover extends JavaPlugin implements Listener {
             getLogger().info("The LaggRemover AI is now active!");
         }
         getLogger().info("LaggRemover has been enabled!");
-        if (getConfig().getBoolean("auto-update")) {
-            Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable() { // from class: drew6017.lr.main.LaggRemover.2
-                @Override // java.lang.Runnable
-                public void run() {
-                    new Updater((Plugin) LaggRemover.lr, 91200, LaggRemover.this.getFile(), Updater.UpdateType.DEFAULT, true);
-                }
-            }, 0L, 144000L);
-        }
+//        if (getConfig().getBoolean("auto-update")) {
+//            Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable() { // from class: drew6017.lr.main.LaggRemover.2
+//                @Override // java.lang.Runnable
+//                public void run() {
+//                    new Updater((Plugin) LaggRemover.lr, 91200, LaggRemover.this.getFile(), Updater.UpdateType.DEFAULT, true);
+//                }
+//            }, 0L, 144000L);
+//        }
     }
 
     public void onDisable() {
@@ -219,23 +217,21 @@ public class LaggRemover extends JavaPlugin implements Listener {
 
     /* JADX INFO: Access modifiers changed from: private */
     public void autoLagRemovalLoop() {
-        Bukkit.getScheduler().scheduleSyncDelayedTask(this, new Runnable() { // from class: drew6017.lr.main.LaggRemover.3
-            @Override // java.lang.Runnable
-            public void run() {
-                for (LRProtocol p : LRConfig.periodic_protocols.keySet()) {
-                    DoubleVar<Object[], Boolean> dat = LRConfig.periodic_protocols.get(p);
-                    if (dat.getVar2()) {
-                        Protocol.rund(p, dat.getVar1(), new DelayedLRProtocolResult() { // from class: drew6017.lr.main.LaggRemover.3.1
-                            @Override // drew6017.lr.api.proto.DelayedLRProtocolResult
-                            public void receive(LRProtocolResult result) {
-                            }
-                        });
-                    } else {
-                        p.run(dat.getVar1());
-                    }
+        // from class: drew6017.lr.main.LaggRemover.3
+        Bukkit.getScheduler().scheduleSyncDelayedTask(this, () -> {
+            for (LRProtocol p : LRConfig.periodic_protocols.keySet()) {
+                DoubleVar<Object[], Boolean> dat = LRConfig.periodic_protocols.get(p);
+                if (dat.getVar2()) {
+                    Protocol.rund(p, dat.getVar1(), new DelayedLRProtocolResult() { // from class: drew6017.lr.main.LaggRemover.3.1
+                        @Override // drew6017.lr.api.proto.DelayedLRProtocolResult
+                        public void receive(LRProtocolResult result) {
+                        }
+                    });
+                } else {
+                    p.run(dat.getVar1());
                 }
-                LaggRemover.this.autoLagRemovalLoop();
             }
+            LaggRemover.this.autoLagRemovalLoop();
         }, 1200L * LRConfig.autoLagRemovalTime);
     }
 }

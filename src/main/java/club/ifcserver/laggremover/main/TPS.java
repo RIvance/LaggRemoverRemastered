@@ -33,7 +33,7 @@ public class TPS implements Runnable {
         String bf = BitString.BLOCK_FULL.getComp();
         String bl = BitString.BLOCK_FULL_LIGHT.getComp();
         StringBuilder sb = new StringBuilder();
-        sb.append("§b").append(Double.toString(tps)).append("\n§e<");
+        sb.append("§b").append(tps).append("\n§e<");
         if (tps_whole > 15) {
             sb.append("§a");
         } else if (tps_whole > 5) {

@@ -3,6 +3,8 @@ package club.ifcserver.laggremover.util;
 import java.io.File;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Objects;
+
 import org.bukkit.Bukkit;
 
 /* loaded from: LaggRemover-2.0.6.jar:drew6017/lr/util/DrewMath.class */
@@ -16,11 +18,10 @@ public class DrewMath {
     }
 
     public static long getSize(File folder) {
-        File[] listFiles;
         long j;
         long size;
         long i = 0;
-        for (File f : folder.listFiles()) {
+        for (File f : Objects.requireNonNull(folder.listFiles())) {
             if (f.isFile()) {
                 j = i;
                 size = f.length();
