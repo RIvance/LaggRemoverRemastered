@@ -16,50 +16,48 @@ import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 
-/* loaded from: LaggRemover-2.0.6.jar:drew6017/lr/proto/bin/CCItems.class */
 public class CCItems implements LRProtocol {
     public static Counter counter;
-    private static String help = new HelpFormatter().set(HelpFormatter.HelpFormatterType.DESCRIPTION, "§eRemoves items from all worlds, selected worlds, or selected chunks.").set(HelpFormatter.HelpFormatterType.CATEGORIES, "§eCPU, RAM, and NETWORK").set(HelpFormatter.HelpFormatterType.ARGUMENTS, HelpFormatter.generateArgs(new CCItems().getPP())).set(HelpFormatter.HelpFormatterType.RETURNS, "§e{0: <(int)CCed>}").make();
+    private static final String help = new HelpFormatter().set(HelpFormatter.HelpFormatterType.DESCRIPTION, "§eRemoves items from all worlds, selected worlds, or selected chunks.").set(HelpFormatter.HelpFormatterType.CATEGORIES, "§eCPU, RAM, and NETWORK").set(HelpFormatter.HelpFormatterType.ARGUMENTS, HelpFormatter.generateArgs(new CCItems().getProtocolParser())).set(HelpFormatter.HelpFormatterType.RETURNS, "§e{0: <(int)CCed>}").make();
 
-    @Override // drew6017.lr.api.proto.LRProtocol
+    @Override
     public void init() {
         counter = Protocol.getCounter(this);
     }
 
-    @Override // drew6017.lr.api.proto.LRProtocol
+    @Override
     public String id() {
         return "cc_items";
     }
 
-    @Override // drew6017.lr.api.proto.LRProtocol
+    @Override
     public String help() {
         return help;
     }
 
-    @Override // drew6017.lr.api.proto.LRProtocol
+    @Override
     public ProtocolCategory[] category() {
         return new ProtocolCategory[]{ProtocolCategory.CPU, ProtocolCategory.RAM, ProtocolCategory.NETWORK};
     }
 
-    @Override // drew6017.lr.api.proto.LRProtocol
+    @Override
     public LRProtocolResult run(Object[] args) {
         LRProtocolResult result;
-        boolean count = ((Boolean) args[0]).booleanValue();
+        boolean count = (Boolean) args[0];
         if (args.length == 1) {
             final int i = clearItems(count);
-            result = new LRProtocolResult(this) { // from class: drew6017.lr.proto.bin.CCItems.1
-                @Override // drew6017.lr.api.proto.LRProtocolResult
+            result = new LRProtocolResult(this) {
+                @Override
                 public Object[] getData() {
                     return new Object[]{Integer.valueOf(i)};
                 }
             };
         } else if (args.length == 2) {
-            int i2 = args[1] instanceof World ? clearItems(((World) args[1]).getEntities(), count) : clearItems(Arrays.asList(((Chunk) args[1]).getEntities()), count);
-            final int i3 = i2;
-            result = new LRProtocolResult(this) { // from class: drew6017.lr.proto.bin.CCItems.2
-                @Override // drew6017.lr.api.proto.LRProtocolResult
+            final int i3 = args[1] instanceof World ? clearItems(((World) args[1]).getEntities(), count) : clearItems(Arrays.asList(((Chunk) args[1]).getEntities()), count);
+            result = new LRProtocolResult(this) {
+                @Override
                 public Object[] getData() {
-                    return new Object[]{Integer.valueOf(i3)};
+                    return new Object[]{i3};
                 }
             };
         } else {
@@ -68,10 +66,10 @@ public class CCItems implements LRProtocol {
         return result;
     }
 
-    @Override // drew6017.lr.api.proto.LRProtocol
-    public ProtoParse getPP() {
-        return new ProtoParse() { // from class: drew6017.lr.proto.bin.CCItems.3
-            @Override // drew6017.lr.api.aparser.ProtoParse
+    @Override
+    public ProtoParse getProtocolParser() {
+        return new ProtoParse() {
+            @Override
             public HashMap<String, ProtoParseData> getKeysToClass() {
                 HashMap<String, ProtoParseData> k = new HashMap<>();
                 k.put("Count", new ProtoParseData(ProtoParseKeywords.BOOLEAN, 0));

@@ -10,10 +10,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
+
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -21,7 +19,6 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.json.simple.parser.ParseException;
 
-/* loaded from: LaggRemover-2.0.6.jar:drew6017/lr/util/LRConfig.class */
 public class LRConfig {
     public static double lagConstant;
     public static long ramConstant;
@@ -43,66 +40,66 @@ public class LRConfig {
     public static float localThinPercent;
     public static HashMap<LRProtocol, Counter> counters;
     public static HashMap<LRProtocol, DoubleVar<Object[], Boolean>> periodic_protocols;
-    public static HashMap<LRProtocol, DoubleVar<Object[], Boolean>> ram_protocols;
-    public static HashMap<LRProtocol, DoubleVar<Object[], Boolean>> tps_protocols;
+    public static HashMap<LRProtocol, DoubleVar<Object[], Boolean>> ramProtocols;
+    public static HashMap<LRProtocol, DoubleVar<Object[], Boolean>> tpsProtocols;
 
     public static void reload() {
         DoubleVar<Object[], Boolean> dat;
         DoubleVar<Object[], Boolean> dat2;
         DoubleVar<Object[], Boolean> dat3;
-        FileConfiguration f = new YamlConfiguration();
+        FileConfiguration configuration = new YamlConfiguration();
         try {
-            f.load(new File(LaggRemover.lr.getDataFolder(), "config.yml"));
+            configuration.load(new File(LaggRemover.instance.getDataFolder(), "config.yml"));
         } catch (IOException | InvalidConfigurationException e) {
-            LaggRemover.lr.getLogger().severe("Error loading configuration:");
+            LaggRemover.instance.getLogger().severe("Error loading configuration:");
             e.printStackTrace();
-            f = LaggRemover.lr.getConfig();
+            configuration = LaggRemover.instance.getConfig();
         }
-        lagConstant = f.getDouble("TPS");
-        ramConstant = f.getLong("RAM");
-        autoChunk = f.getBoolean("autoChunk");
-        thinMobs = f.getBoolean("thinMobs");
-        thinAt = f.getInt("thinAt");
-        autoLagRemovalTime = f.getInt("auto-lag-removal.every");
-        noSpawnChunks = f.getBoolean("noSpawnChunks");
-        autoLagRemoval = f.getBoolean("auto-lag-removal.run");
-        isAIActive = f.getBoolean("smartlagai");
-        List<String> noSaveWorlds = f.getStringList("nosaveworlds");
+        lagConstant = configuration.getDouble("TPS");
+        ramConstant = configuration.getLong("RAM");
+        autoChunk = configuration.getBoolean("autoChunk");
+        thinMobs = configuration.getBoolean("thinMobs");
+        thinAt = configuration.getInt("thinAt");
+        autoLagRemovalTime = configuration.getInt("auto-lag-removal.every");
+        noSpawnChunks = configuration.getBoolean("noSpawnChunks");
+        autoLagRemoval = configuration.getBoolean("auto-lag-removal.run");
+        isAIActive = configuration.getBoolean("smartlagai");
+        List<String> noSaveWorlds = configuration.getStringList("nosaveworlds");
         counters = new HashMap<>();
         periodic_protocols = new HashMap<>();
-        ram_protocols = new HashMap<>();
-        tps_protocols = new HashMap<>();
-        localLagRemovalCooldown = f.getInt("localLagRemovalCooldown");
-        chatDelay = f.getInt("chatDelay");
-        doRelativeAction = f.getBoolean("doRelativeAction");
-        doOnlyItemsForRelative = f.getBoolean("doOnlyItemsForRelative");
-        dontDoFriendlyMobsForRelative = f.getBoolean("dontDoFriendlyMobsForRelative");
-        localLagRadius = f.getInt("localLagRadius");
-        localLagTriggered = f.getInt("localLagTriggered");
-        localThinPercent = f.getInt("localThinPercent") / 100.0f;
-        smartaicooldown = f.getLong("smartaicooldown");
+        ramProtocols = new HashMap<>();
+        tpsProtocols = new HashMap<>();
+        localLagRemovalCooldown = configuration.getInt("localLagRemovalCooldown");
+        chatDelay = configuration.getInt("chatDelay");
+        doRelativeAction = configuration.getBoolean("doRelativeAction");
+        doOnlyItemsForRelative = configuration.getBoolean("doOnlyItemsForRelative");
+        dontDoFriendlyMobsForRelative = configuration.getBoolean("dontDoFriendlyMobsForRelative");
+        localLagRadius = configuration.getInt("localLagRadius");
+        localLagTriggered = configuration.getInt("localLagTriggered");
+        localThinPercent = configuration.getInt("localThinPercent") / 100.0f;
+        smartaicooldown = configuration.getLong("smartaicooldown");
         for (LRProtocol p : Protocol.getProtocols()) {
-            if (f.contains("protocol_warnings." + p.id())) {
+            if (configuration.contains("protocol_warnings." + p.id())) {
                 counters.put(p, Protocol.getCounter(p));
             }
             String lpk = "lag_protocols.periodically." + p.id();
             String lpk_ram = "lag_protocols.low_ram." + p.id();
             String lpk_tps = "lag_protocols.low_tps." + p.id();
-            if (f.contains(lpk) && (dat3 = loadP(p, lpk, f)) != null) {
+            if (configuration.contains(lpk) && (dat3 = loadP(p, lpk, configuration)) != null) {
                 periodic_protocols.put(p, dat3);
             }
-            if (f.contains(lpk_ram) && (dat2 = loadP(p, lpk_ram, f)) != null) {
-                ram_protocols.put(p, dat2);
+            if (configuration.contains(lpk_ram) && (dat2 = loadP(p, lpk_ram, configuration)) != null) {
+                ramProtocols.put(p, dat2);
             }
-            if (f.contains(lpk_tps) && (dat = loadP(p, lpk_tps, f)) != null) {
-                tps_protocols.put(p, dat);
+            if (configuration.contains(lpk_tps) && (dat = loadP(p, lpk_tps, configuration)) != null) {
+                tpsProtocols.put(p, dat);
             }
         }
         if (!noSaveWorlds.contains("DISABLED")) {
             for (World w : Bukkit.getWorlds()) {
                 if (noSaveWorlds.contains(w.getName())) {
                     w.setAutoSave(false);
-                    LaggRemover.lr.getLogger().info("World \"" + w.getName() + "\" will not automatically save.");
+                    LaggRemover.instance.getLogger().info("World \"" + w.getName() + "\" will not automatically save.");
                 }
             }
         }
@@ -110,42 +107,41 @@ public class LRConfig {
 
     private static DoubleVar<Object[], Boolean> loadP(LRProtocol p, String lpk, FileConfiguration f) {
         try {
-            DoubleVar<Object[], Boolean> dat = AnfoParser.parse(p, f.getString(lpk));
-            return dat;
+            return AnfoParser.parse(p, f.getString(lpk));
         } catch (AnfoParser.AnfoParseException | ParseException e) {
-            LaggRemover.lr.getLogger().info("Error parsing protocol info for \"" + lpk + "\": " + e.toString());
+            LaggRemover.instance.getLogger().info("Error parsing protocol info for \"" + lpk + "\": " + e.toString());
             return null;
         }
     }
 
     public static void init() {
-        File config = new File(LaggRemover.lr.getDataFolder(), "config.yml");
+        File config = new File(LaggRemover.instance.getDataFolder(), "config.yml");
         if (!config.exists()) {
-            LaggRemover.lr.saveDefaultConfig();
+            LaggRemover.instance.saveDefaultConfig();
         }
-        if (DrewMath.intFrom(LaggRemover.lr.getConfig().getString("version")) < 16) {
-            LaggRemover.lr.getLogger().info("The saved version is not compatible with this version of LaggRemover and could not be updated by the automatic configuration updater. LaggRemover will back up the current configuration and generate a new one for you. Please manually copy over any old settings.");
+        if (DrewMath.intFrom(Objects.requireNonNull(LaggRemover.instance.getConfig().getString("version"))) < 16) {
+            LaggRemover.instance.getLogger().info("The saved version is not compatible with this version of LaggRemover and could not be updated by the automatic configuration updater. LaggRemover will back up the current configuration and generate a new one for you. Please manually copy over any old settings.");
             try {
-                FileWriter w = new FileWriter(new File(LaggRemover.lr.getDataFolder(), "config(backup-" + new SimpleDateFormat("yyyy-MM-dd-HHmmss").format(Calendar.getInstance().getTime()) + ").yml"));
+                FileWriter w = new FileWriter(new File(LaggRemover.instance.getDataFolder(), "config(backup-" + new SimpleDateFormat("yyyy-MM-dd-HHmmss").format(Calendar.getInstance().getTime()) + ").yml"));
                 w.write(new String(Files.readAllBytes(config.toPath())));
                 w.flush();
                 w.close();
             } catch (IOException e) {
-                LaggRemover.lr.getLogger().info("An error occurred when backing up the old configuration (" + e.getMessage() + ").");
+                LaggRemover.instance.getLogger().info("An error occurred when backing up the old configuration (" + e.getMessage() + ").");
             }
             if (config.delete()) {
-                LaggRemover.lr.saveDefaultConfig();
+                LaggRemover.instance.saveDefaultConfig();
             } else {
-                LaggRemover.lr.getLogger().info("Could not delete old configuration. Please delete it manually and restart your server to prevent imminent errors.");
+                LaggRemover.instance.getLogger().info("Could not delete old configuration. Please delete it manually and restart your server to prevent imminent errors.");
             }
         }
-        check(LaggRemover.config_version);
+        check(LaggRemover.CONFIG_VERSION);
         reload();
     }
 
     private static void check(String version) {
         try {
-            if (!LaggRemover.lr.getConfig().getString("version").equals(version)) {
+            if (!Objects.equals(LaggRemover.instance.getConfig().getString("version"), version)) {
                 updateConfig(version);
             }
         } catch (Exception e) {
@@ -155,7 +151,7 @@ public class LRConfig {
 
     private static void updateConfig(String config_version) {
         HashMap<String, Object> newConfig = getConfigVals();
-        FileConfiguration c = LaggRemover.lr.getConfig();
+        FileConfiguration c = LaggRemover.instance.getConfig();
         for (String var : c.getKeys(false)) {
             newConfig.remove(var);
         }
@@ -165,11 +161,11 @@ public class LRConfig {
             }
             try {
                 c.set("version", config_version);
-                c.save(new File(LaggRemover.lr.getDataFolder(), "config.yml"));
-            } catch (IOException e) {
+                c.save(new File(LaggRemover.instance.getDataFolder(), "config.yml"));
+            } catch (IOException ignored) {
             }
         }
-        LaggRemover.lr.getLogger().info("Your configuration file was updated to v" + config_version);
+        LaggRemover.instance.getLogger().info("Your configuration file was updated to v" + config_version);
     }
 
     private static HashMap<String, Object> getConfigVals() {
@@ -177,7 +173,7 @@ public class LRConfig {
         YamlConfiguration config = new YamlConfiguration();
         try {
             config.loadFromString(stringFromInputStream(LaggRemover.class.getResourceAsStream("/config.yml")));
-        } catch (InvalidConfigurationException e) {
+        } catch (InvalidConfigurationException ignored) {
         }
         for (String key : config.getKeys(false)) {
             var.put(key, config.get(key));

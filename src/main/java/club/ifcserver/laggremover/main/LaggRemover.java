@@ -22,6 +22,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntitySpawnEvent;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,26 +34,22 @@ import java.util.HashMap;
 import java.util.Objects;
 import java.util.zip.ZipFile;
 
-/* loaded from: LaggRemover-2.0.6.jar:drew6017/lr/main/LaggRemover.class */
 public class LaggRemover extends JavaPlugin implements Listener {
-    public static final String config_version = "0.1.7";
-    public static final int wipeConfigLowerThan = 16;
+    public static final String CONFIG_VERSION = "0.1.7";
     public static final long MEMORY_MBYTE_SIZE = 1024;
-    public static final int MAX_PING_SIZE = 10000;
-    public static LaggRemover lr;
+    public static LaggRemover instance;
     public static String prefix = "§6§lLaggRemover §7§l>>§r ";
     public static File modDir;
     private static HashMap<Module, String[]> loaded;
 
     public void onEnable() {
 
-        lr = this;
+        instance = this;
         GlobalRegionScheduler scheduler = Bukkit.getGlobalRegionScheduler();
 
         Bukkit.getServer().getPluginManager().registerEvents(new Events(), this);
 
-        // new TPS().runTaskTimerAsynchronously(this, 100L, 1L);
-        scheduler.runAtFixedRate(this, __ -> new TPS().run(), 100L, 1L);
+        scheduler.runAtFixedRate(this, __ -> new TickPerSecond().run(), 100L, 1L);
 
         Help.init();
         Protocol.init();
@@ -61,12 +58,10 @@ public class LaggRemover extends JavaPlugin implements Listener {
         prefix = Objects.requireNonNull(getConfig().getString("prefix")).replaceAll("&", "§");
 
         if (LRConfig.autoChunk) {
-            // from class: drew6017.lr.main.LaggRemover.1
             scheduler.runAtFixedRate(this, scheduledTask -> {
                 for (World world : LaggRemover.this.getServer().getWorlds()) {
                     if (world.getPlayers().size() == 0) {
                         for (Chunk chunk : world.getLoadedChunks()) {
-                            getLogger().info("Unloading chuck (" + chunk.getX() + ", " + chunk.getZ() + ")");
                             if (!world.unloadChunkRequest(chunk.getX(), chunk.getZ())) {
                                 getLogger().info("Failed to unload chuck (" + chunk.getX() + ", " + chunk.getZ() + ")");
                             }
@@ -85,22 +80,20 @@ public class LaggRemover extends JavaPlugin implements Listener {
         }
         for (File f : Objects.requireNonNull(modDir.listFiles())) {
             if (!f.isDirectory() && f.getName().endsWith(".jar")) {
-                try {
-                    URL[] classes = {f.toURI().toURL()};
+                try (ZipFile zipFile = new ZipFile(f)) {
+                    URL[] classes = { f.toURI().toURL() };
                     URLClassLoader loader = new URLClassLoader(classes, LaggRemover.class.getClassLoader());
-                    ZipFile i = new ZipFile(f);
                     YamlConfiguration c = new YamlConfiguration();
-                    c.load(new InputStreamReader(i.getInputStream(i.getEntry("module.yml"))));
+                    c.load(new InputStreamReader(zipFile.getInputStream(zipFile.getEntry("module.yml"))));
                     String name = c.getString("name");
                     String version = c.getString("version");
                     String author = c.getString("author");
                     getLogger().info("Loading module \"" + name + "-" + version + "\" created by \"" + author + "\"...");
                     Class<?> plugin = Class.forName(c.getString("main"), true, loader);
-                    Module m = (Module) plugin.newInstance();
-                    loaded.put(m, new String[]{name, version, author});
-                    m.onEnable();
-                } catch (IOException | ClassNotFoundException | IllegalAccessException | InstantiationException |
-                         InvalidConfigurationException e2) {
+                    Module module = (Module) plugin.getDeclaredConstructor().newInstance();
+                    loaded.put(module, new String[]{name, version, author});
+                    module.onEnable();
+                } catch (IOException | InvalidConfigurationException | ReflectiveOperationException exception) {
                     getLogger().info("LaggRemover located an invalid module named \"" + f.getName() + "\"");
                 }
             }
@@ -113,11 +106,11 @@ public class LaggRemover extends JavaPlugin implements Listener {
     }
 
     public void onDisable() {
-        Bukkit.getScheduler().cancelTasks(lr);
-        for (Module m : loaded.keySet()) {
-            m.onDisable();
+        Bukkit.getScheduler().cancelTasks(instance);
+        for (Module module : loaded.keySet()) {
+            module.onDisable();
         }
-        lr = null;
+        instance = null;
         getLogger().info("LaggRemover has been disabled!");
     }
 
@@ -131,7 +124,7 @@ public class LaggRemover extends JavaPlugin implements Listener {
         if (!sbs.equals("")) {
             sbs = sbs.substring(0, sbs.length() - 2);
         }
-        return new String[]{sbs, Integer.toString(loaded.size())};
+        return new String[]{ sbs, Integer.toString(loaded.size()) };
     }
 
     public static String[] getProtocolList() {
@@ -156,19 +149,19 @@ public class LaggRemover extends JavaPlugin implements Listener {
         }
     }
 
-    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-        Player p = sender instanceof Player ? (Player) sender : null;
+    public boolean onCommand(@NotNull CommandSender sender, Command cmd, @NotNull String label, String[] args) {
+        Player player = sender instanceof Player ? (Player) sender : null;
         if (cmd.getName().equalsIgnoreCase("lr")) {
             if (args.length == 0) {
-                Help.send(p, 1);
+                Help.send(player, 1);
                 return true;
-            } else if (!LRCommand.onCommand(p, args)) {
+            } else if (!LRCommand.onCommand(player, args)) {
                 for (Module m : loaded.keySet()) {
                     if (m.onCommand(sender, label, args)) {
                         return true;
                     }
                 }
-                Help.sendMsg(p, "§cCommand not found! Use /lr help for a list of commands.", true);
+                Help.sendMsg(player, "§cCommand not found! Use /lr help for a list of commands.", true);
                 return true;
             } else {
                 return true;
@@ -187,15 +180,13 @@ public class LaggRemover extends JavaPlugin implements Listener {
         return loaded.get(m);
     }
 
-    /* JADX INFO: Access modifiers changed from: private */
     public void autoLagRemovalLoop() {
-        // from class: drew6017.lr.main.LaggRemover.3
         Bukkit.getScheduler().scheduleSyncDelayedTask(this, () -> {
             for (LRProtocol p : LRConfig.periodic_protocols.keySet()) {
                 DoubleVar<Object[], Boolean> dat = LRConfig.periodic_protocols.get(p);
                 if (dat.getVar2()) {
                     Protocol.rund(p, dat.getVar1(), new DelayedLRProtocolResult() { // from class: drew6017.lr.main.LaggRemover.3.1
-                        @Override // drew6017.lr.api.proto.DelayedLRProtocolResult
+                        @Override
                         public void receive(LRProtocolResult result) {
                         }
                     });

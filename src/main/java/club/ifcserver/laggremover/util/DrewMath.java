@@ -7,7 +7,6 @@ import java.util.Objects;
 
 import org.bukkit.Bukkit;
 
-/* loaded from: LaggRemover-2.0.6.jar:drew6017/lr/util/DrewMath.class */
 public class DrewMath {
     public static double round(double value, int places) {
         if (places < 0) {
@@ -40,7 +39,6 @@ public class DrewMath {
     }
 
     public static int intFrom(String s) {
-        char[] charArray;
         StringBuilder sb = new StringBuilder();
         for (char c : s.toCharArray()) {
             if (c == '0' || c == '1' || c == '2' || c == '3' || c == '4' || c == '5' || c == '6' || c == '7' || c == '8' || c == '9') {
@@ -48,10 +46,6 @@ public class DrewMath {
             }
         }
         return Integer.parseInt(sb.toString());
-    }
-
-    public static <T> T cast(Class<T> cls, Object o) {
-        return cls.cast(o);
     }
 
     public static boolean between(long var, long low, long high) {

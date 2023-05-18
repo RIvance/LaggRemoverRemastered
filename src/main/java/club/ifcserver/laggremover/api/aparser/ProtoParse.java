@@ -1,24 +1,22 @@
 package club.ifcserver.laggremover.api.aparser;
 
 import java.util.HashMap;
+
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.entity.EntityType;
 
-/* loaded from: LaggRemover-2.0.6.jar:drew6017/lr/api/aparser/ProtoParse.class */
 public abstract class ProtoParse {
 
-    /* loaded from: LaggRemover-2.0.6.jar:drew6017/lr/api/aparser/ProtoParse$KeywordParser.class */
     public static abstract class KeywordParser {
         public abstract Object parse(String str);
     }
 
     public abstract HashMap<String, ProtoParseData> getKeysToClass();
 
-    /* loaded from: LaggRemover-2.0.6.jar:drew6017/lr/api/aparser/ProtoParse$ProtoParseData.class */
     public static class ProtoParseData {
-        private ProtoParseKeywords clazz;
-        private int index;
+        private final ProtoParseKeywords clazz;
+        private final int index;
 
         public ProtoParseData(ProtoParseKeywords clazz, int index) {
             this.clazz = clazz;
@@ -36,67 +34,67 @@ public abstract class ProtoParse {
 
     /* loaded from: LaggRemover-2.0.6.jar:drew6017/lr/api/aparser/ProtoParse$ProtoParseKeywords.class */
     public enum ProtoParseKeywords {
-        BOOLEAN("Boolean", new KeywordParser() { // from class: drew6017.lr.api.aparser.ProtoParse.ProtoParseKeywords.1
-            @Override // drew6017.lr.api.aparser.ProtoParse.KeywordParser
+        BOOLEAN("Boolean", new KeywordParser() {
+            @Override
             public Object parse(String data) {
-                return Boolean.valueOf(Boolean.parseBoolean(data));
+                return Boolean.parseBoolean(data);
             }
         }),
-        INTEGER("Integer", new KeywordParser() { // from class: drew6017.lr.api.aparser.ProtoParse.ProtoParseKeywords.2
-            @Override // drew6017.lr.api.aparser.ProtoParse.KeywordParser
+        INTEGER("Integer", new KeywordParser() {
+            @Override
             public Object parse(String data) {
-                return Integer.valueOf(Integer.parseInt(data));
+                return Integer.parseInt(data);
             }
         }),
-        STRING("String", new KeywordParser() { // from class: drew6017.lr.api.aparser.ProtoParse.ProtoParseKeywords.3
-            @Override // drew6017.lr.api.aparser.ProtoParse.KeywordParser
+        STRING("String", new KeywordParser() {
+            @Override
             public Object parse(String data) {
                 return data;
             }
         }),
-        WORLD("World", new KeywordParser() { // from class: drew6017.lr.api.aparser.ProtoParse.ProtoParseKeywords.4
-            @Override // drew6017.lr.api.aparser.ProtoParse.KeywordParser
+        WORLD("World", new KeywordParser() {
+            @Override
             public Object parse(String data) {
                 return Bukkit.getWorld(data);
             }
         }),
-        CHUNK("Chunk", new KeywordParser() { // from class: drew6017.lr.api.aparser.ProtoParse.ProtoParseKeywords.5
-            @Override // drew6017.lr.api.aparser.ProtoParse.KeywordParser
+        CHUNK("Chunk", new KeywordParser() {
+            @Override
             public Object parse(String data) {
-                String[] s = data.split(",");
-                World w = Bukkit.getWorld(s[0]);
-                if (w == null) {
+                String[] pos = data.split(",");
+                World world = Bukkit.getWorld(pos[0]);
+                if (world == null) {
                     return null;
                 }
-                return w.getChunkAt(Integer.parseInt(s[1]), Integer.parseInt(s[2]));
+                return world.getChunkAt(Integer.parseInt(pos[1]), Integer.parseInt(pos[2]));
             }
         }),
-        ENTITY_TYPE_ARRAY("EntityType[]", new KeywordParser() { // from class: drew6017.lr.api.aparser.ProtoParse.ProtoParseKeywords.6
-            @Override // drew6017.lr.api.aparser.ProtoParse.KeywordParser
+        ENTITY_TYPE_ARRAY("EntityType[]", new KeywordParser() {
+            @Override
             public Object parse(String data) {
                 String[] s = data.split(",");
-                EntityType[] ents = new EntityType[s.length];
-                for (int i = 0; i < ents.length; i++) {
-                    ents[i] = EntityType.valueOf(s[i]);
+                EntityType[] entityTypes = new EntityType[s.length];
+                for (int i = 0; i < entityTypes.length; i++) {
+                    entityTypes[i] = EntityType.valueOf(s[i]);
                 }
-                return ents;
+                return entityTypes;
             }
         });
-        
-        private KeywordParser p;
-        private String s;
 
-        ProtoParseKeywords(String s, KeywordParser p) {
-            this.p = p;
-            this.s = s;
+        private final KeywordParser parser;
+        private final String name;
+
+        ProtoParseKeywords(String name, KeywordParser parser) {
+            this.parser = parser;
+            this.name = name;
         }
 
         public KeywordParser getParser() {
-            return this.p;
+            return this.parser;
         }
 
         public String getProperName() {
-            return this.s;
+            return this.name;
         }
     }
 }

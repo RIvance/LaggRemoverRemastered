@@ -8,34 +8,29 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-/* loaded from: LaggRemover-2.0.6.jar:drew6017/lr/api/aparser/AnfoParser.class */
 public class AnfoParser {
-    public static DoubleVar<Object[], Boolean> parse(LRProtocol pro, String data_raw) throws AnfoParseException, ParseException {
-        JSONObject data = readJSON(data_raw);
-        HashMap<String, ProtoParse.ProtoParseData> k = pro.getPP().getKeysToClass();
-        HashMap<Integer, Object> a = new HashMap<>();
+    public static DoubleVar<Object[], Boolean> parse(LRProtocol protocol, String dataRaw) throws AnfoParseException, ParseException {
+        JSONObject jsonData = readJSON(dataRaw);
+        HashMap<String, ProtoParse.ProtoParseData> k = protocol.getProtocolParser().getKeysToClass();
+        HashMap<Integer, Object> objMap = new HashMap<>();
         boolean isDelay = false;
-        for (Object o : data.keySet()) {
-            String key = (String) o;
+        for (Object obj : jsonData.keySet()) {
+            String key = (String) obj;
             if (key.equals("Delay")) {
-                isDelay = Boolean.parseBoolean((String) data.get(key));
+                isDelay = Boolean.parseBoolean((String) jsonData.get(key));
             } else if (!k.containsKey(key)) {
-                throw new AnfoParseException("The arguments for \"" + pro.id() + "\" contained an unregistered key.");
+                throw new AnfoParseException("The arguments for \"" + protocol.id() + "\" contained an unregistered key.");
             } else {
-                ProtoParse.ProtoParseData d = k.get(key);
-                String data_in = (String) data.get(key);
-                a.put(Integer.valueOf(d.getIndex()), data_in.equalsIgnoreCase("null") ? null : d.getClazz().getParser().parse(data_in));
+                ProtoParse.ProtoParseData protoParseData = k.get(key);
+                String dataIn = (String) jsonData.get(key);
+                objMap.put(protoParseData.getIndex(), dataIn.equalsIgnoreCase("null") ? null : protoParseData.getClazz().getParser().parse(dataIn));
             }
         }
-        Object[] oa = new Object[((Integer) Collections.max(a.keySet())).intValue() + 1];
+        Object[] oa = new Object[Collections.max(objMap.keySet()) + 1];
         for (int i = 0; i < oa.length; i++) {
-            if (a.containsKey(Integer.valueOf(i))) {
-                oa[i] = a.get(Integer.valueOf(i));
-            } else {
-                oa[i] = null;
-            }
+            oa[i] = objMap.getOrDefault(i, null);
         }
-        return new DoubleVar<>(oa, Boolean.valueOf(isDelay));
+        return new DoubleVar<>(oa, isDelay);
     }
 
     private static JSONObject readJSON(String data) throws ParseException {
@@ -43,17 +38,16 @@ public class AnfoParser {
         return (JSONObject) parse.parse(data);
     }
 
-    /* loaded from: LaggRemover-2.0.6.jar:drew6017/lr/api/aparser/AnfoParser$AnfoParseException.class */
     public static class AnfoParseException extends Exception {
-        private String msg;
+        private final String message;
 
-        AnfoParseException(String msg) {
-            this.msg = msg;
+        AnfoParseException(String message) {
+            this.message = message;
         }
 
-        @Override // java.lang.Throwable
+        @Override
         public String toString() {
-            return this.msg;
+            return this.message;
         }
     }
 }

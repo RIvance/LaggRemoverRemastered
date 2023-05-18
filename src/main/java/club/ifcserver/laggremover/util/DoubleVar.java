@@ -1,6 +1,5 @@
 package club.ifcserver.laggremover.util;
 
-/* loaded from: LaggRemover-2.0.6.jar:drew6017/lr/util/DoubleVar.class */
 public class DoubleVar<T1, T2> {
     private final T1 t1;
     private final T2 t2;

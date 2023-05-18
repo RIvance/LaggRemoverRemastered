@@ -78,7 +78,7 @@ public class LRCommand {
                 StringBuilder sb = new StringBuilder();
                 sb.append("\n                      §7§l--->> §6§lLaggRemover §7§l<<---§r");
                 sb.append("\n§e").append(s).append(" Worlds:§7 ").append(Bukkit.getWorlds().size());
-                sb.append("\n§e").append(s).append(" TPS:§7 ").append(Double.toString(DrewMath.round(TPS.getTPS(), 2)));
+                sb.append("\n§e").append(s).append(" TPS:§7 ").append(Double.toString(DrewMath.round(TickPerSecond.getTPS(), 2)));
                 sb.append("\n§e").append(s).append(" RAM:§7 ").append(NumberFormat.getNumberInstance().format(ram_used)).append(" / ").append(NumberFormat.getNumberInstance().format(ram_total)).append("MB (").append(Double.toString(DrewMath.round((ram_used / ram_total) * 100.0d, 1))).append("%)");
                 sb.append("\n§e").append(s).append(" Loaded Chunks:§7 ").append(NumberFormat.getNumberInstance().format(chunks));
                 sb.append("\n§e").append(s).append(" Entities:§7 ").append(NumberFormat.getNumberInstance().format(entities));
@@ -109,14 +109,14 @@ public class LRCommand {
             noPerm(p);
             return true;
         } else if (args[0].equalsIgnoreCase("info") || args[0].equalsIgnoreCase("i")) {
-            Help.sendMsg(p, "§6§lLaggRemover\n §aAuthor: §edrew6017\n §aVersion: §e" + LaggRemover.lr.getDescription().getVersion() + "\n §aWebsite: §ehttp://dev.bukkit.org/bukkit-plugins/laggremover/\n §aDonate: §ehttps://goo.gl/1q3wN5\n §aInfo: §eLaggRemover §7was created by drew6017 to help server owners grow their servers to a professional level by improving performance and automating server care to keep players and owners happy.", false);
+            Help.sendMsg(p, "§6§lLaggRemover\n §aAuthor: §edrew6017\n §aVersion: §e" + LaggRemover.instance.getDescription().getVersion() + "\n §aWebsite: §ehttp://dev.bukkit.org/bukkit-plugins/laggremover/\n §aDonate: §ehttps://goo.gl/1q3wN5\n §aInfo: §eLaggRemover §7was created by drew6017 to help server owners grow their servers to a professional level by improving performance and automating server care to keep players and owners happy.", false);
             return true;
         } else if (args[0].equalsIgnoreCase("world") || args[0].equalsIgnoreCase("w")) {
             if (hasPerm(p, "lr.world")) {
                 if (args.length == 2) {
                     w = Bukkit.getWorld(args[1]);
                 } else if (p == null) {
-                    LaggRemover.lr.getLogger().info("You must be a player to not specify an argument here.");
+                    LaggRemover.instance.getLogger().info("You must be a player to not specify an argument here.");
                     return true;
                 } else {
                     w = p.getWorld();
@@ -142,10 +142,10 @@ public class LRCommand {
         } else if (args[0].equalsIgnoreCase("tps")) {
             if (hasPerm(p, "lr.tps")) {
                 if (p == null) {
-                    LaggRemover.lr.getLogger().info("TPS: " + Double.toString(DrewMath.round(TPS.getTPS(), 2)));
+                    LaggRemover.instance.getLogger().info("TPS: " + Double.toString(DrewMath.round(TickPerSecond.getTPS(), 2)));
                     return true;
                 }
-                Help.sendMsg(p, "§eTPS: " + TPS.format(), true);
+                Help.sendMsg(p, "§eTPS: " + TickPerSecond.format(), true);
                 return true;
             }
             noPerm(p);

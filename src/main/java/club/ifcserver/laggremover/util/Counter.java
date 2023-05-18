@@ -7,17 +7,11 @@ import org.bukkit.Bukkit;
 /* loaded from: LaggRemover-2.0.6.jar:drew6017/lr/util/Counter.class */
 public abstract class Counter {
     private long on;
-    private long secondsDelay;
+    private final long secondsDelay;
     private HashMap<Long, CountAction> actions = new HashMap<>();
     private boolean started = false;
 
     public abstract void onFinish();
-
-    static /* synthetic */ long access$110(Counter x0) {
-        long j = x0.on;
-        x0.on = j - 1;
-        return j;
-    }
 
     public Counter(long secondsDelay) {
         this.secondsDelay = secondsDelay;
@@ -39,33 +33,30 @@ public abstract class Counter {
 
     /* JADX INFO: Access modifiers changed from: private */
     public void one() {
-        if (this.actions.containsKey(Long.valueOf(this.on))) {
-            this.actions.get(Long.valueOf(this.on)).onTrigger();
+        if (this.actions.containsKey(this.on)) {
+            this.actions.get(this.on).onTrigger();
         }
-        Bukkit.getScheduler().scheduleSyncDelayedTask(LaggRemover.lr, new Runnable() { // from class: drew6017.lr.util.Counter.1
-            @Override // java.lang.Runnable
-            public void run() {
-                if (Counter.this.started) {
-                    Counter.access$110(Counter.this);
-                    if (Counter.this.on > 0) {
-                        Counter.this.one();
-                        return;
-                    }
-                    Counter.this.reset();
-                    Counter.this.onFinish();
+        // from class: drew6017.lr.util.Counter.1
+        Bukkit.getScheduler().scheduleSyncDelayedTask(LaggRemover.instance, () -> {
+            if (Counter.this.started) {
+                Counter.this.on -= 1;
+                if (Counter.this.on > 0) {
+                    Counter.this.one();
+                    return;
                 }
+                Counter.this.reset();
+                Counter.this.onFinish();
             }
         }, 20L);
     }
 
     public Counter addAction(CountAction a) {
-        this.actions.put(Long.valueOf(a.getTrigger()), a);
+        this.actions.put(a.getTrigger(), a);
         return this;
     }
 
-    public Counter setActions(HashMap<Long, CountAction> actions) {
+    public void setActions(HashMap<Long, CountAction> actions) {
         this.actions = actions;
-        return this;
     }
 
     public boolean isActive() {
@@ -74,7 +65,7 @@ public abstract class Counter {
 
     /* loaded from: LaggRemover-2.0.6.jar:drew6017/lr/util/Counter$CountAction.class */
     public static abstract class CountAction {
-        private long trigger;
+        private final long trigger;
 
         public abstract void onTrigger();
 

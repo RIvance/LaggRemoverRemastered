@@ -31,11 +31,12 @@ public class Events implements Listener {
     @EventHandler(priority = EventPriority.LOWEST)
     public void onWorldLoad(WorldInitEvent e) {
         if (LRConfig.noSpawnChunks) {
-            LaggRemover.lr.getLogger().warning("Config `noSpawnChunks` is not supported in Folia, disabled.");
-            // e.getWorld().setKeepSpawnInMemory(false);
+            LaggRemover.instance.getLogger().warning("Config `noSpawnChunks` is not supported in Folia, disabled.");
+            // FIXME: e.getWorld().setKeepSpawnInMemory(false);
         }
     }
 
+    // TODO: use AsyncChatEvent instead
     @EventHandler(priority = EventPriority.LOWEST)
     public void onChat(AsyncPlayerChatEvent e) {
         Player p = e.getPlayer();
@@ -52,49 +53,45 @@ public class Events implements Listener {
             if (canSLDRun && LRConfig.isAIActive) {
                 smartLagDetection();
             }
-            final List<Entity> ents = p.getNearbyEntities(LRConfig.localLagRadius, LRConfig.localLagRadius, LRConfig.localLagRadius);
-            if (ents.size() < LRConfig.localLagTriggered) {
+            final List<Entity> nearbyEntities = p.getNearbyEntities(LRConfig.localLagRadius, LRConfig.localLagRadius, LRConfig.localLagRadius);
+            if (nearbyEntities.size() < LRConfig.localLagTriggered) {
                 return;
             }
             cooldown(uuid);
-            int entsLeng = (int) (ents.size() * LRConfig.localThinPercent);
-            int toRemove = ents.size() - entsLeng;
-            for (int i = 0; i < toRemove && !ents.isEmpty(); i++) {
-                ents.remove(0);
+            int entsLeng = (int) (nearbyEntities.size() * LRConfig.localThinPercent);
+            int toRemove = nearbyEntities.size() - entsLeng;
+            for (int i = 0; i < toRemove && !nearbyEntities.isEmpty(); i++) {
+                nearbyEntities.remove(0);
             }
             p.sendMessage("§eEntities around you are being removed because we detected you were lagging.");
             if (LRConfig.doOnlyItemsForRelative) {
-                Bukkit.getScheduler().scheduleSyncDelayedTask(LaggRemover.lr, new Runnable() { // from class: drew6017.lr.main.Events.1
+                Bukkit.getScheduler().scheduleSyncDelayedTask(LaggRemover.instance, new Runnable() { // from class: drew6017.lr.main.Events.1
                     @Override // java.lang.Runnable
                     public void run() {
-                        for (Entity en : ents) {
-                            if (en.getType().equals(EntityType.DROPPED_ITEM)) {
-                                en.remove();
+                        for (Entity entity : nearbyEntities) {
+                            if (entity.getType().equals(EntityType.DROPPED_ITEM)) {
+                                entity.remove();
                             }
                         }
                     }
                 }, 1L);
             } else if (LRConfig.dontDoFriendlyMobsForRelative) {
-                Bukkit.getScheduler().scheduleSyncDelayedTask(LaggRemover.lr, new Runnable() { // from class: drew6017.lr.main.Events.2
-                    @Override // java.lang.Runnable
-                    public void run() {
-                        CCEntities.clearEntities(ents, false, CCEntities.hostile);
-                        for (Entity en : ents) {
-                            if (en.getType().equals(EntityType.DROPPED_ITEM)) {
-                                en.remove();
-                            }
+                // from class: drew6017.lr.main.Events.2
+                Bukkit.getScheduler().scheduleSyncDelayedTask(LaggRemover.instance, () -> {
+                    CCEntities.clearEntities(nearbyEntities, false, CCEntities.hostile);
+                    for (Entity entity : nearbyEntities) {
+                        if (entity.getType().equals(EntityType.DROPPED_ITEM)) {
+                            entity.remove();
                         }
                     }
                 }, 1L);
             } else {
-                // from class: drew6017.lr.main.Events.3
-                // java.lang.Runnable
-                Bukkit.getScheduler().scheduleSyncDelayedTask(LaggRemover.lr, () -> {
-                    CCEntities.clearEntities(ents, false, CCEntities.hostile);
-                    CCEntities.clearEntities(ents, false, CCEntities.peaceful);
-                    for (Entity en : ents) {
-                        if (en.getType().equals(EntityType.DROPPED_ITEM)) {
-                            en.remove();
+                Bukkit.getScheduler().scheduleSyncDelayedTask(LaggRemover.instance, () -> {
+                    CCEntities.clearEntities(nearbyEntities, false, CCEntities.hostile);
+                    CCEntities.clearEntities(nearbyEntities, false, CCEntities.peaceful);
+                    for (Entity entity : nearbyEntities) {
+                        if (entity.getType().equals(EntityType.DROPPED_ITEM)) {
+                            entity.remove();
                         }
                     }
                 }, 1L);
@@ -112,9 +109,8 @@ public class Events implements Listener {
 
     private void cooldown(final UUID u) {
         useLocationLagRemoval.add(u);
-        // from class: drew6017.lr.main.Events.4
         Bukkit.getScheduler().scheduleSyncDelayedTask(
-            LaggRemover.lr,
+            LaggRemover.instance,
             () -> Events.useLocationLagRemoval.remove(u),
             20L * LRConfig.localLagRemovalCooldown
         );
@@ -122,18 +118,16 @@ public class Events implements Listener {
 
     private void smartAIcooldown() {
         canSLDRun = false;
-        // from class: drew6017.lr.main.Events.5
-        Bukkit.getScheduler().scheduleSyncDelayedTask(LaggRemover.lr, () -> {
-            boolean unused = Events.canSLDRun = true;
+        Bukkit.getScheduler().scheduleSyncDelayedTask(LaggRemover.instance, () -> {
+            Events.canSLDRun = true;
         }, 1200 * LRConfig.smartaicooldown);
     }
 
-    private void chatDelayCooldown(final UUID u) {
-        chatDelay.add(u);
-        // from class: drew6017.lr.main.Events.6
+    private void chatDelayCooldown(final UUID uuid) {
+        chatDelay.add(uuid);
         Bukkit.getScheduler().scheduleSyncDelayedTask(
-            LaggRemover.lr,
-            () -> Events.chatDelay.remove(u),
+            LaggRemover.instance,
+            () -> Events.chatDelay.remove(uuid),
             LRConfig.chatDelay
         );
     }
@@ -144,11 +138,11 @@ public class Events implements Listener {
         long ram_used = ((r.totalMemory() - r.freeMemory()) / LaggRemover.MEMORY_MBYTE_SIZE) / LaggRemover.MEMORY_MBYTE_SIZE;
         long ram_total = (r.maxMemory() / LaggRemover.MEMORY_MBYTE_SIZE) / LaggRemover.MEMORY_MBYTE_SIZE;
         if (ram_total - ram_used < LRConfig.ramConstant) {
-            for (LRProtocol p : LRConfig.ram_protocols.keySet()) {
-                DoubleVar<Object[], Boolean> dat = LRConfig.ram_protocols.get(p);
+            for (LRProtocol p : LRConfig.ramProtocols.keySet()) {
+                DoubleVar<Object[], Boolean> dat = LRConfig.ramProtocols.get(p);
                 if (dat.getVar2()) {
-                    Protocol.rund(p, dat.getVar1(), new DelayedLRProtocolResult() { // from class: drew6017.lr.main.Events.7
-                        @Override // drew6017.lr.api.proto.DelayedLRProtocolResult
+                    Protocol.rund(p, dat.getVar1(), new DelayedLRProtocolResult() {
+                        @Override
                         public void receive(LRProtocolResult result) {
                         }
                     });
@@ -156,12 +150,12 @@ public class Events implements Listener {
                     p.run(dat.getVar1());
                 }
             }
-        } else if (TPS.getTPS() < LRConfig.lagConstant) {
-            for (LRProtocol p2 : LRConfig.tps_protocols.keySet()) {
-                DoubleVar<Object[], Boolean> dat2 = LRConfig.tps_protocols.get(p2);
+        } else if (TickPerSecond.getTPS() < LRConfig.lagConstant) {
+            for (LRProtocol p2 : LRConfig.tpsProtocols.keySet()) {
+                DoubleVar<Object[], Boolean> dat2 = LRConfig.tpsProtocols.get(p2);
                 if (dat2.getVar2()) {
                     Protocol.rund(p2, dat2.getVar1(), new DelayedLRProtocolResult() { // from class: drew6017.lr.main.Events.8
-                        @Override // drew6017.lr.api.proto.DelayedLRProtocolResult
+                        @Override
                         public void receive(LRProtocolResult result) {
                         }
                     });

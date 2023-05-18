@@ -12,14 +12,12 @@ import java.util.HashMap;
 import java.util.List;
 import org.bukkit.Bukkit;
 
-/* loaded from: LaggRemover-2.0.6.jar:drew6017/lr/api/proto/Protocol.class */
 public class Protocol {
     private static HashMap<String, LRProtocol> protocols;
 
-    public static int init() {
+    public static void init() {
         protocols = new HashMap<>();
         register(new CCEntities(), new CCItems(), new LRGC(), new RunCommand());
-        return protocols.size();
     }
 
     public static void register(LRProtocol... pros) {
@@ -35,10 +33,6 @@ public class Protocol {
 
     public static Collection<LRProtocol> getProtocols() {
         return protocols.values();
-    }
-
-    public static boolean hasProtocol(String id) {
-        return protocols.containsKey(id);
     }
 
     public static LRProtocol getProtocol(String name) {
@@ -60,7 +54,7 @@ public class Protocol {
     public static Counter getCounter(String p) {
         String var = null;
         HashMap<Long, Counter.CountAction> actions = new HashMap<>();
-        List<String> args = LaggRemover.lr.getConfig().getStringList("protocol_warnings." + p + ".stages");
+        List<String> args = LaggRemover.instance.getConfig().getStringList("protocol_warnings." + p + ".stages");
         for (String arg : args) {
             final String[] a = arg.replaceAll("&", "§").replaceAll("%PREFIX%", LaggRemover.prefix).split(":");
             if (a[0].equalsIgnoreCase("f")) {
@@ -75,8 +69,8 @@ public class Protocol {
             }
         }
         final String var2 = var;
-        Counter counter = new Counter(LaggRemover.lr.getConfig().getLong("protocol_warnings." + p + ".time")) { // from class: drew6017.lr.api.proto.Protocol.2
-            @Override // drew6017.lr.util.Counter
+        Counter counter = new Counter(LaggRemover.instance.getConfig().getLong("protocol_warnings." + p + ".time")) { // from class: drew6017.lr.api.proto.Protocol.2
+            @Override
             public void onFinish() {
                 if (var2 != null) {
                     LaggRemover.broadcast(var2);
@@ -101,7 +95,7 @@ public class Protocol {
     /* JADX INFO: Access modifiers changed from: private */
     public static void delayLoop(final Counter c, final DelayedLRProtocolResult res, final LRProtocol p, final Object[] args) {
         // from class: drew6017.lr.api.proto.Protocol.3
-        Bukkit.getScheduler().scheduleSyncDelayedTask(LaggRemover.lr, () -> {
+        Bukkit.getScheduler().scheduleSyncDelayedTask(LaggRemover.instance, () -> {
             if (c.isActive()) {
                 Protocol.delayLoop(c, res, p, args);
             } else {

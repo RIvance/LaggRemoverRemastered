@@ -19,15 +19,13 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Monster;
 
-/* loaded from: LaggRemover-2.0.6.jar:drew6017/lr/proto/bin/CCEntities.class */
 public class CCEntities implements LRProtocol {
     public static EntityType[] hostile;
     public static EntityType[] peaceful;
     public static Counter counter;
-    private static String help;
+    private static final String help;
 
     static {
-        EntityType[] values;
         List<EntityType> hostEnts = new ArrayList<>();
         List<EntityType> peaceEnts = new ArrayList<>();
         for (EntityType ent : EntityType.values()) {
@@ -39,9 +37,9 @@ public class CCEntities implements LRProtocol {
                 }
             }
         }
-        hostile = (EntityType[]) hostEnts.toArray(new EntityType[hostEnts.size()]);
-        peaceful = (EntityType[]) peaceEnts.toArray(new EntityType[peaceEnts.size()]);
-        help = new HelpFormatter().set(HelpFormatter.HelpFormatterType.DESCRIPTION, "§eRemoves entities from all worlds, selected worlds, or selected chunks.").set(HelpFormatter.HelpFormatterType.CATEGORIES, "§eCPU, RAM, and NETWORK").set(HelpFormatter.HelpFormatterType.ARGUMENTS, HelpFormatter.generateArgs(new CCEntities().getPP())).set(HelpFormatter.HelpFormatterType.RETURNS, "§e{0: <(int)CCed>}").make();
+        hostile = hostEnts.toArray(new EntityType[0]);
+        peaceful = peaceEnts.toArray(new EntityType[0]);
+        help = new HelpFormatter().set(HelpFormatter.HelpFormatterType.DESCRIPTION, "§eRemoves entities from all worlds, selected worlds, or selected chunks.").set(HelpFormatter.HelpFormatterType.CATEGORIES, "§eCPU, RAM, and NETWORK").set(HelpFormatter.HelpFormatterType.ARGUMENTS, HelpFormatter.generateArgs(new CCEntities().getProtocolParser())).set(HelpFormatter.HelpFormatterType.RETURNS, "§e{0: <(int)CCed>}").make();
     }
 
     @Override // drew6017.lr.api.proto.LRProtocol
@@ -59,23 +57,23 @@ public class CCEntities implements LRProtocol {
         return help;
     }
 
-    @Override // drew6017.lr.api.proto.LRProtocol
+    @Override
     public ProtocolCategory[] category() {
         return new ProtocolCategory[]{ProtocolCategory.CPU, ProtocolCategory.RAM, ProtocolCategory.NETWORK};
     }
 
-    @Override // drew6017.lr.api.proto.LRProtocol
+    @Override
     public LRProtocolResult run(Object[] args) {
         LRProtocolResult result;
         int i;
-        boolean count = ((Boolean) args[0]).booleanValue();
+        boolean count = (Boolean) args[0];
         EntityType[] toClear = (EntityType[]) args[1];
         if (args.length == 2) {
             final int i2 = clearEntities(count, toClear);
-            result = new LRProtocolResult(this) { // from class: drew6017.lr.proto.bin.CCEntities.1
-                @Override // drew6017.lr.api.proto.LRProtocolResult
+            result = new LRProtocolResult(this) {
+                @Override
                 public Object[] getData() {
-                    return new Object[]{Integer.valueOf(i2)};
+                    return new Object[] { i2 };
                 }
             };
         } else if (args.length == 3) {
@@ -93,10 +91,10 @@ public class CCEntities implements LRProtocol {
                 i = 0;
             }
             final int i3 = i;
-            result = new LRProtocolResult(this) { // from class: drew6017.lr.proto.bin.CCEntities.2
-                @Override // drew6017.lr.api.proto.LRProtocolResult
+            result = new LRProtocolResult(this) {
+                @Override
                 public Object[] getData() {
-                    return new Object[]{Integer.valueOf(i3)};
+                    return new Object[] { i3 };
                 }
             };
         } else {
@@ -105,10 +103,10 @@ public class CCEntities implements LRProtocol {
         return result;
     }
 
-    @Override // drew6017.lr.api.proto.LRProtocol
-    public ProtoParse getPP() {
-        return new ProtoParse() { // from class: drew6017.lr.proto.bin.CCEntities.3
-            @Override // drew6017.lr.api.aparser.ProtoParse
+    @Override
+    public ProtoParse getProtocolParser() {
+        return new ProtoParse() {
+            @Override
             public HashMap<String, ProtoParseData> getKeysToClass() {
                 HashMap<String, ProtoParseData> k = new HashMap<>();
                 k.put("Count", new ProtoParseData(ProtoParseKeywords.BOOLEAN, 0));
@@ -142,12 +140,12 @@ public class CCEntities implements LRProtocol {
         return i;
     }
 
-    private static boolean orAll(EntityType e, EntityType... all) {
+    private static boolean orAll(EntityType entityType, EntityType... all) {
         if (all == null) {
             return true;
         }
-        for (EntityType ent : all) {
-            if (e.equals(ent)) {
+        for (EntityType type : all) {
+            if (entityType.equals(type)) {
                 return true;
             }
         }

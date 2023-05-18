@@ -1,9 +1,7 @@
 package club.ifcserver.laggremover.util;
 
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
-/* loaded from: LaggRemover-2.0.6.jar:drew6017/lr/util/BitString.class */
 public enum BitString {
     BLOCK_FULL(226, 150, 136),
     BLOCK_FULL_LIGHT(226, 150, 145),

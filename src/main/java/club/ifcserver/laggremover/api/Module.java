@@ -8,8 +8,8 @@ import org.bukkit.command.CommandSender;
 
 /* loaded from: LaggRemover-2.0.6.jar:drew6017/lr/api/Module.class */
 public class Module {
-    public static void registerHelp(String com, String help) {
-        Help.addCommandH("§e " + com + ":§7 " + help);
+    public static void registerHelp(String command, String help) {
+        Help.addCommandH("§e " + command + ":§7 " + help);
     }
 
     public void onEnable() {
@@ -23,7 +23,7 @@ public class Module {
     }
 
     public final Logger getLogger() {
-        return LaggRemover.lr.getLogger();
+        return LaggRemover.instance.getLogger();
     }
 
     public boolean onCommand(CommandSender sender, String label, String[] args) {

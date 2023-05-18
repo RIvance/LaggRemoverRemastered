@@ -2,7 +2,6 @@ package club.ifcserver.laggremover.api.proto;
 
 import club.ifcserver.laggremover.api.aparser.ProtoParse;
 
-/* loaded from: LaggRemover-2.0.6.jar:drew6017/lr/api/proto/LRProtocol.class */
 public interface LRProtocol {
     void init();
 
@@ -12,7 +11,7 @@ public interface LRProtocol {
 
     ProtocolCategory[] category();
 
-    LRProtocolResult run(Object[] objArr);
+    LRProtocolResult run(Object[] objects);
 
-    ProtoParse getPP();
+    ProtoParse getProtocolParser();
 }

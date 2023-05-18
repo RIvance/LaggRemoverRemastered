@@ -29,7 +29,7 @@ public class HelpFormatter {
     }
 
     @NotNull
-    public String mk() throws HelpFormatException {
+    public String make0() throws HelpFormatException {
         if (this.parts.size() != 4) {
             throw new HelpFormatException("You must set all help fields in order to compile help information.");
         }
@@ -38,7 +38,7 @@ public class HelpFormatter {
 
     public String make() {
         try {
-            return mk();
+            return make0();
         } catch (HelpFormatException e) {
             return null;
         }
@@ -49,27 +49,27 @@ public class HelpFormatter {
     }
 
     @NotNull
-    public static String generateArgs(ProtoParse p) {
-        HashMap<String, ProtoParse.ProtoParseData> var = p.getKeysToClass();
+    public static String generateArgs(ProtoParse protoParse) {
+        HashMap<String, ProtoParse.ProtoParseData> var = protoParse.getKeysToClass();
         StringBuilder sb = new StringBuilder();
         HashMap<Integer, List<DoubleVar<String, ProtoParse.ProtoParseData>>> var1 = new HashMap<>();
         for (String s : var.keySet()) {
-            ProtoParse.ProtoParseData da = var.get(s);
-            List<DoubleVar<String, ProtoParse.ProtoParseData>> l = var1.containsKey(Integer.valueOf(da.getIndex())) ? var1.get(Integer.valueOf(da.getIndex())) : new ArrayList<>();
-            l.add(new DoubleVar<>(s, da));
-            var1.put(Integer.valueOf(da.getIndex()), l);
+            ProtoParse.ProtoParseData protoParseData = var.get(s);
+            List<DoubleVar<String, ProtoParse.ProtoParseData>> list = var1.containsKey(Integer.valueOf(protoParseData.getIndex())) ? var1.get(Integer.valueOf(protoParseData.getIndex())) : new ArrayList<>();
+            list.add(new DoubleVar<>(s, protoParseData));
+            var1.put(protoParseData.getIndex(), list);
         }
         sb.append("§e{");
         int v1length = var1.size();
         for (Integer num : var1.keySet()) {
-            int i = num.intValue();
+            int i = num;
             sb.append(i).append(": ");
-            List<DoubleVar<String, ProtoParse.ProtoParseData>> list = var1.get(Integer.valueOf(i));
+            List<DoubleVar<String, ProtoParse.ProtoParseData>> list = var1.get(i);
             int size = list.size();
-            for (int ii = 0; ii < size; ii++) {
-                DoubleVar<String, ProtoParse.ProtoParseData> vag = list.get(ii);
+            for (int j = 0; j < size; j++) {
+                DoubleVar<String, ProtoParse.ProtoParseData> vag = list.get(j);
                 sb.append(vag.getVar2().getClazz().getProperName()).append("(").append(vag.getVar1()).append(")");
-                if (ii + 1 < size) {
+                if (j + 1 < size) {
                     sb.append(" | ");
                 }
             }
@@ -81,18 +81,16 @@ public class HelpFormatter {
         return sb.toString();
     }
 
-    /* JADX INFO: Access modifiers changed from: private */
-    /* loaded from: LaggRemover-2.0.6.jar:drew6017/lr/api/proto/help/HelpFormatter$HelpFormatException.class */
-    public class HelpFormatException extends Exception {
-        private String msg;
+    public static class HelpFormatException extends Exception {
+        private final String message;
 
-        HelpFormatException(String msg) {
-            this.msg = msg;
+        HelpFormatException(String message) {
+            this.message = message;
         }
 
         @Override // java.lang.Throwable
         public String toString() {
-            return this.msg;
+            return this.message;
         }
     }
 }
