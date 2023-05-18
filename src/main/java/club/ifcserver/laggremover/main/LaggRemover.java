@@ -8,7 +8,6 @@ import club.ifcserver.laggremover.api.proto.Protocol;
 import club.ifcserver.laggremover.inf.Help;
 import club.ifcserver.laggremover.util.DoubleVar;
 import club.ifcserver.laggremover.util.LRConfig;
-import io.papermc.paper.threadedregions.scheduler.GlobalRegionScheduler;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.World;
@@ -22,6 +21,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntitySpawnEvent;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitScheduler;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -45,11 +45,11 @@ public class LaggRemover extends JavaPlugin implements Listener {
     public void onEnable() {
 
         instance = this;
-        GlobalRegionScheduler scheduler = Bukkit.getGlobalRegionScheduler();
+        BukkitScheduler scheduler = Bukkit.getScheduler();
 
         Bukkit.getServer().getPluginManager().registerEvents(new Events(), this);
 
-        scheduler.runAtFixedRate(this, __ -> new TickPerSecond().run(), 100L, 1L);
+        scheduler.runTaskTimer(this, __ -> new TickPerSecond().run(), 100L, 1L);
 
         Help.init();
         Protocol.init();
@@ -58,7 +58,7 @@ public class LaggRemover extends JavaPlugin implements Listener {
         prefix = Objects.requireNonNull(getConfig().getString("prefix")).replaceAll("&", "§");
 
         if (LRConfig.autoChunk) {
-            scheduler.runAtFixedRate(this, scheduledTask -> {
+            scheduler.runTaskTimer(this, scheduledTask -> {
                 for (World world : LaggRemover.this.getServer().getWorlds()) {
                     if (world.getPlayers().size() == 0) {
                         for (Chunk chunk : world.getLoadedChunks()) {
